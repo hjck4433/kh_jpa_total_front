@@ -99,7 +99,10 @@ function ChatList() {
         console.log(error);
       }
     };
-    getChatRoom();
+    const intervalID = setInterval(getChatRoom, 1000);
+    return () => {
+      clearInterval(intervalID);
+    };
   }, []);
 
   const enterChatRoom = (roomId) => {

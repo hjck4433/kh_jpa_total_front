@@ -9,6 +9,7 @@ import {
   Container,
   Items,
 } from "../../component/signup/LoginComponent";
+import Common from "../../utils/Common";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -63,11 +64,9 @@ const Login = () => {
     //로그인을 위한 axios 호출
     const res = await AxiosApi.memberLogin(inputEmail, inputPw);
     console.log(res.data);
-    if (res.data === true) {
-      localStorage.setItem("email", inputEmail); // 브라우저에서 임시로 값을 저장하는 기술
-      localStorage.setItem("userPw", inputPw);
-      localStorage.setItem("isLogin", "TRUE");
-      // fetchUserName();
+    if (res.data.grantType === "Bearer") {
+      Common.setAccessToken(res.data.accessToken);
+      Common.setRefreshToken(res.data.refreshToken);
       navigate("/home");
     } else {
       setModalOpen(true);

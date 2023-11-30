@@ -20,6 +20,7 @@ import { BiCameraMovie } from "react-icons/bi";
 import { CgProfile } from "react-icons/cg";
 import { useNavigate } from "react-router-dom";
 import AxiosApi from "../api/AxiosApi";
+import Common from "../utils/Common";
 
 // 사이드바 메뉴를 구성 합니다.
 
@@ -28,7 +29,6 @@ const Layout = () => {
   const { color, name, setName } = context;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const email = localStorage.getItem("email");
   const [member, setMember] = useState({});
 
   const onClickLeft = () => {
@@ -39,13 +39,26 @@ const Layout = () => {
   };
 
   useEffect(() => {
+    const accessToken = Common.getAccessToken();
     const getMember = async () => {
       try {
-        const rsp = await AxiosApi.memberGetOne(email);
+        const rsp = await AxiosApi.memberGetOne(accessToken);
+        console.log("getMemberRsp : " + rsp.data.name);
+        console.log("이름! " + name);
         setMember(rsp.data);
         setName(rsp.data.name);
       } catch (e) {
-        console.error(e);
+        if (e.response.status === 401) {
+          await Common.handleUnathorized();
+          const newToken = Common.getAccessToken();
+          if (newToken !== accessToken) {
+            const rsp = await AxiosApi.memberGetOne(newToken);
+            if (rsp.status === 200) {
+              setMember(rsp.data);
+              setName(rsp.data.name);
+            }
+          }
+        }
       }
     };
     getMember();

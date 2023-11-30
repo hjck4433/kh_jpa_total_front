@@ -170,6 +170,21 @@ const Chatting = () => {
       console.log(data.message);
       setChatList((prevItems) => [...prevItems, data]);
     };
+
+    return () => {
+      if (socketConnected) {
+        ws.current.send(
+          JSON.stringify({
+            type: "CLOSE",
+            roomId: roomId,
+            sender: sender,
+            senderName: userName,
+            message: "종료 합니다.",
+          })
+        );
+        ws.current.close();
+      }
+    };
   }, [socketConnected]);
 
   // 화면 하단으로 자동 스크롤
@@ -185,6 +200,8 @@ const Chatting = () => {
   useEffect(() => {
     fetchChatName();
     console.log(chatName);
+
+    return onClickMsgClose();
   }, []);
 
   const fetchChatName = async () => {
